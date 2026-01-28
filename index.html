@@ -1,89 +1,93 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Từ mới giao tiếp</title>
+
+<!-- PapaParse -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
 body{
-    margin:0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI";
-    background:#e9eef4;
+  margin:0;
+  font-family:system-ui;
+  background:#e9eef4;
 }
 .app{
-    max-width:420px;
-    margin:auto;
-    background:#fff;
-    min-height:100vh;
-    padding:16px;
+  max-width:420px;
+  margin:auto;
+  background:#fff;
+  min-height:100vh;
+  padding:16px;
 }
-h1{
-    text-align:center;
-}
+h1{text-align:center}
 .hidden{display:none}
 .list button{
-    width:100%;
-    padding:14px;
-    margin:6px 0;
-    border:none;
-    border-radius:12px;
-    font-size:16px;
-    background:#f1f3f6;
-    cursor:pointer;
+  width:100%;
+  padding:14px;
+  margin:6px 0;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  background:#f1f3f6;
 }
 .card{
-    height:220px;
-    border-radius:16px;
-    background:#f6f7fb;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:28px;
-    text-align:center;
-    padding:20px;
+  height:220px;
+  border-radius:16px;
+  background:#f6f7fb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  text-align:center;
+  padding:20px;
 }
 .controls button{
-    width:48%;
-    padding:12px;
-    border:none;
-    border-radius:12px;
-    font-size:16px;
+  width:48%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
 }
 .good{background:#4caf50;color:#fff}
 .bad{background:#f44336;color:#fff}
 .top{
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
 }
 </style>
 </head>
 
-<body onload="initApp()">
+<body>
 <div class="app">
 
-<!-- MÀN GIÁO TRÌNH -->
+<!-- GIÁO TRÌNH -->
 <div id="library">
-    <h1>Giáo Trình</h1>
-    <p id="loading" style="text-align:center;color:#999">Đang tải dữ liệu...</p>
-    <div id="level-list" class="list"></div>
+  <h1>Giáo Trình</h1>
+  <p id="loading" style="text-align:center;color:#999">
+    Đang tải dữ liệu...
+  </p>
+  <div id="level-list" class="list"></div>
 </div>
 
-<!-- MÀN HỌC -->
+<!-- HỌC -->
 <div id="study" class="hidden">
-    <div class="top">
-        <b id="lesson-name"></b>
-        <span id="card-progress"></span>
-    </div>
-    <div class="card" id="card" onclick="flipCard()">
-        <div id="front-text"></div>
-        <div id="back-text" class="hidden"></div>
-    </div>
-    <div class="controls" style="margin-top:12px">
-        <button class="bad" onclick="mark(false)">❌ Chưa nhớ</button>
-        <button class="good" onclick="mark(true)">✅ Đã nhớ</button>
-    </div>
+  <div class="top">
+    <b id="lesson-name"></b>
+    <span id="card-progress"></span>
+  </div>
+
+  <div class="card" onclick="flipCard()">
+    <div id="front-text"></div>
+    <div id="back-text" class="hidden"></div>
+  </div>
+
+  <div class="controls" style="margin-top:12px">
+    <button class="bad" onclick="next()">❌ Chưa nhớ</button>
+    <button class="good" onclick="next()">✅ Đã nhớ</button>
+  </div>
 </div>
 
 </div>
@@ -92,83 +96,65 @@ h1{
 const CSV_URL =
 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS9uWZ2kz54fpqjGrQ9L-BaPyrA_BXaO50O0aCX-hrpgC18bu6uW0CvIQ4ZVmJxKSbXasHu4M8cWTml/pub?gid=861638906&single=true&output=csv';
 
-let allWords=[], currentVocab=[], curIdx=0;
+let data=[], lesson=[], idx=0;
 
-function parseCSV(text){
-    const rows=[]; let row=[], cell='', inside=false;
-    for(let i=0;i<text.length;i++){
-        const c=text[i], n=text[i+1];
-        if(c=='"' && inside && n=='"'){ cell+='"'; i++; }
-        else if(c=='"'){ inside=!inside; }
-        else if(c==',' && !inside){ row.push(cell); cell=''; }
-        else if(c=='\n' && !inside){
-            row.push(cell); rows.push(row);
-            row=[]; cell='';
-        } else cell+=c;
-    }
-    if(cell) row.push(cell);
-    if(row.length) rows.push(row);
-    return rows;
-}
-
-async function initApp(){
-    const res = await fetch(CSV_URL);
-    const text = await res.text();
-    const rows = parseCSV(text);
-    rows.shift();
-
-    allWords = rows.map(r=>({
-        h:r[0]?.trim(),
-        n:r[1]?.trim(),
-        b:r[2]?.trim() || 'Khác',
-        l:r[3]?.trim() || '1'
-    })).filter(w=>w.h && w.n);
-
+Papa.parse(CSV_URL,{
+  download:true,
+  header:true,
+  skipEmptyLines:true,
+  complete:(res)=>{
+    data = res.data.filter(r=>r['Tiếng Nhật'] && r['Tiếng Việt']);
     renderLibrary();
-}
+  },
+  error:(err)=>{
+    document.getElementById('loading').innerText='❌ Lỗi tải dữ liệu';
+    console.error(err);
+  }
+});
 
 function renderLibrary(){
-    document.getElementById('loading').remove();
-    const levels = [...new Set(allWords.map(w=>w.b))];
-    const list = document.getElementById('level-list');
-    levels.forEach(l=>{
-        const b=document.createElement('button');
-        b.innerText=l;
-        b.onclick=()=>startLevel(l);
-        list.appendChild(b);
-    });
+  document.getElementById('loading').remove();
+  const box=document.getElementById('level-list');
+
+  const lessons=[...new Set(data.map(d=>d['Bài']))];
+
+  lessons.forEach(l=>{
+    const b=document.createElement('button');
+    b.innerText='Bài '+l;
+    b.onclick=()=>startLesson(l);
+    box.appendChild(b);
+  });
 }
 
-function startLevel(level){
-    currentVocab = allWords.filter(w=>w.b===level);
-    curIdx=0;
-    document.getElementById('library').classList.add('hidden');
-    document.getElementById('study').classList.remove('hidden');
-    showCard();
+function startLesson(l){
+  lesson=data.filter(d=>d['Bài']==l);
+  idx=0;
+  document.getElementById('library').classList.add('hidden');
+  document.getElementById('study').classList.remove('hidden');
+  show();
 }
 
-function showCard(){
-    const w=currentVocab[curIdx];
-    document.getElementById('front-text').innerText=w.h;
-    document.getElementById('back-text').innerText=w.n;
-    document.getElementById('back-text').classList.add('hidden');
-    document.getElementById('lesson-name').innerText='Bài '+w.l;
-    document.getElementById('card-progress').innerText=
-        `${curIdx+1}/${currentVocab.length}`;
+function show(){
+  const w=lesson[idx];
+  document.getElementById('front-text').innerText=w['Tiếng Nhật'];
+  document.getElementById('back-text').innerText=w['Tiếng Việt'];
+  document.getElementById('back-text').classList.add('hidden');
+  document.getElementById('lesson-name').innerText='Bài '+w['Bài'];
+  document.getElementById('card-progress').innerText=
+    `${idx+1}/${lesson.length}`;
 }
 
 function flipCard(){
-    document.getElementById('back-text').classList.toggle('hidden');
+  document.getElementById('back-text').classList.toggle('hidden');
 }
 
-function mark(ok){
-    curIdx++;
-    if(curIdx>=currentVocab.length){
-        alert('🎉 Hoàn thành!');
-        location.reload();
-    }else showCard();
+function next(){
+  idx++;
+  if(idx>=lesson.length){
+    alert('🎉 Hoàn thành!');
+    location.reload();
+  }else show();
 }
 </script>
-
 </body>
 </html>
