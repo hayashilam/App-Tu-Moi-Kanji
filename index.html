@@ -2,177 +2,420 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Marugoto Learning - V21 U</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Từ Mới Pro V21 U - 3D Flip Edition</title>
     <style>
-        :root { --bg: #f8fafc; --primary: #5c6bc0; --app-width: 480px; }
-        body { background-color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
-        .app-container { width: 100%; max-width: var(--app-width); min-height: 100vh; background-color: var(--bg); position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.1); overflow-x: hidden; }
-        .screen { display: none; min-height: 100vh; width: 100%; padding: 20px; box-sizing: border-box; }
-        .screen.active { display: flex; flex-direction: column; align-items: center; }
-        .book-card { width: 100%; min-height: 140px; padding: 30px; border-radius: 35px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.04); cursor: pointer; position: relative; border-width: 2px; margin-bottom: 20px; transition: 0.2s; }
-        .word-count { position: absolute; top: 25px; right: 25px; font-size: 0.75rem; font-weight: 800; padding: 6px 14px; border-radius: 99px; background: white; }
-        .flip-card { perspective: 1000px; width: 100%; height: 350px; }
-        .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 40px; padding: 20px; text-align: center; }
-        .card-front { background: white; color: #334155; font-weight: 900; }
-        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); font-weight: 800; }
-        .nav-btn { width: 70px; height: 70px; background: white; border-radius: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #cbd5e1; }
-        .quiz-option { width: 100%; padding: 18px; margin-bottom: 12px; background: white; border-radius: 20px; font-weight: 700; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.04); }
+        :root { --primary: #3b82f6; --bg: #f8fafc; --red: #ff4757; --gray: #94a3b8; --success: #22c55e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100dvh; overflow: hidden; background: #e2e8f0; font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 500px; height: 100dvh; background: var(--bg); display: flex; flex-direction: column; padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px; box-shadow: 0 0 50px rgba(0,0,0,0.1); position: relative; }
+        
+        .pg-bar-wrap { width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        #pg-bar-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s; }
+
+        .header { flex-shrink: 0; padding-top: 10px; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; height: 40px; }
+        .tab-menu { display: flex; justify-content: center; gap: 20px; margin-top: 5px; }
+        .tab-link { font-weight: bold; color: var(--gray); font-size: 14px; cursor: pointer; padding-bottom: 8px; position: relative; }
+        .tab-link.active { color: var(--primary); }
+        .tab-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); border-radius: 3px; }
+        
+        .controls { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 15px 0; }
+        .m-btn { min-width: 42px; height: 32px; padding: 0 5px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-weight: bold; color: var(--primary); font-size: 11px; cursor: pointer; }
+        .m-btn.active { background: var(--red); color: #fff; border-color: var(--red); }
+        .ctrl-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.08); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 20px; }
+
+        /* CSS CHO HIỆU ỨNG LẬT 3D (CHỈ THÊM PHẦN NÀY) */
+        .flip-container { width: 100%; height: 240px; perspective: 1000px; margin-bottom: 30px; }
+        .flipper { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
+        .flipper.flipped { transform: rotateY(180deg); }
+        .box-wrapper { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 35px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 15px; text-align: center; background: #fff; }
+        .box-back { transform: rotateY(180deg); background: var(--primary) !important; color: #fff !important; }
+        
+        #main-txt-container, #main-txt-container-back { width: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        #main-txt, #main-txt-back { font-weight: 900; color: #1e293b; white-space: nowrap; display: inline-block; line-height: 1; }
+        #main-txt-back { color: #fff; }
+        #sub-txt { font-size: 18px; color: var(--gray); margin-top: 10px; font-weight: 500; min-height: 20px; }
+
+        .review-actions { display: flex; gap: 60px; margin-bottom: 40px; }
+        .action-btn { width: 70px; height: 70px; border-radius: 25px; border: 2.5px solid #e2e8f0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 32px; cursor: pointer; }
+        .btn-ok { color: var(--success); border-color: var(--success); }
+        .btn-no { color: var(--red); border-color: var(--red); }
+
+        .opt-btn { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 18px; height: 50px; font-size: 16px; font-weight: 600; width: 100%; margin-bottom: 10px; color: #334155; cursor: pointer; }
+        
+        #input-quiz-wrap { width: 100%; margin-bottom: 20px; display: none; }
+        #user-input { width: 100%; height: 55px; border-radius: 15px; border: 2px solid #e2e8f0; text-align: center; font-size: 20px; font-weight: bold; outline: none; transition: all 0.2s; }
+
+        .bottom-nav { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+        .nav-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-size: 20px; color: var(--primary); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        #screen-range { position: absolute; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:100; display:none; flex-direction:column; padding:40px 20px; }
+        .range-box { background:#fff; padding:30px; border-radius:25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .slider-wrap { margin: 25px 0; }
+        input[type=range] { width:100%; margin: 15px 0; }
+        .range-val { font-size: 24px; font-weight: bold; color: var(--primary); }
+        .start-btn { width:100%; height:60px; background:#1e293b; color:#fff; border:none; border-radius:15px; font-size:18px; font-weight:bold; margin-top:20px; }
+
+        .review-all-btn { width: 100%; padding: 20px; background: #fff; border: 2px dashed var(--red); color: var(--red); border-radius: 20px; font-weight: bold; font-size: 16px; margin-bottom: 20px; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 10px; }
+
+        .book-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 10px; }
+        .book-card { background: #fff; border-radius: 20px; padding: 20px 15px; display: flex; flex-direction: column; position: relative; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); transition: transform 0.2s; }
+        .book-card:active { transform: scale(0.96); }
+        .book-card.color-0 { background: #fff1f2; } .book-card.color-1 { background: #eff6ff; }
+        .book-card.color-2 { background: #f0fdf4; } .book-card.color-3 { background: #fffbeb; }
+        .book-tag { font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 8px; width: fit-content; margin-bottom: 10px; text-transform: uppercase; }
+        .tag-0 { background: #ffe4e6; color: #e11d48; } .tag-1 { background: #dbeafe; color: #2563eb; }
+        .tag-2 { background: #dcfce7; color: #16a34a; } .tag-3 { background: #fef3c7; color: #d97706; }
+        .book-title { font-size: 18px; font-weight: 800; color: #1e293b; line-height: 1.3; margin-bottom: 15px; flex: 1; }
+        .book-footer { display: flex; justify-content: flex-end; }
+        .book-icon { width: 28px; height: 28px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div id="library-screen" class="screen active">
-            <h1 class="text-3xl font-black text-slate-800 my-10 w-full text-left">Giáo Trình</h1>
-            <div id="book-list-container" class="w-full">
-                <div class="text-center p-10"><p class="text-slate-400 font-bold animate-pulse">Đang kết nối dữ liệu...</p></div>
-            </div>
+<div class="container">
+    <div id="screen-books" style="overflow-y:auto; padding:20px 0;">
+        <h2 style="text-align:center; margin-bottom:10px; font-size: 26px; font-weight: 800; color: #1e293b;">Select a Book</h2>
+        <p style="text-align: center; color: var(--gray); font-size: 13px; margin-bottom: 25px;">Choose your textbook to start practicing vocabulary.</p>
+        <div id="review-all-area" style="padding: 0 10px;">
+            <button id="btn-master-review" class="review-all-btn" onclick="startMasterReview()">
+                <span>🚨 ÔN TẬP TỔNG HỢP</span>
+                <small id="review-count-badge" style="background:var(--red); color:#fff; padding:2px 8px; border-radius:10px; font-size:12px;">0</small>
+            </button>
         </div>
-
-        <div id="setup-screen" class="screen justify-center">
-            <div class="w-full bg-white rounded-[40px] p-8">
-                <h2 id="setup-title" class="text-xl font-black mb-8 text-center"></h2>
-                <div class="space-y-10">
-                    <div><div class="flex justify-between font-bold"><span>Từ bài:</span><span id="v1" class="text-indigo-600">1</span></div>
-                    <input type="range" id="range1" class="w-full mt-4" oninput="v1.innerText=this.value"></div>
-                    <div><div class="flex justify-between font-bold"><span>Đến bài:</span><span id="v2" class="text-indigo-600">1</span></div>
-                    <input type="range" id="range2" class="w-full mt-4" oninput="v2.innerText=this.value"></div>
-                </div>
-                <button onclick="startStudy()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold mt-12">Bắt đầu học</button>
-                <button onclick="showScreen('library-screen')" class="w-full mt-4 text-slate-400 font-bold">Quay lại</button>
-            </div>
-        </div>
-
-        <div id="flashcard-screen" class="screen">
-            <div class="w-full flex justify-between items-center my-4">
-                <button onclick="showScreen('setup-screen')" class="text-3xl text-slate-300">‹</button>
-                <div class="flex gap-2">
-                    <button onclick="shuffleData()" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-bold text-xs">Xáo trộn</button>
-                    <button onclick="initQuiz()" class="bg-red-500 text-white px-5 py-2 rounded-xl font-bold">Quiz</button>
-                </div>
-            </div>
-            <div class="flip-card mt-8" onclick="this.classList.toggle('flipped')">
-                <div class="flip-card-inner" id="card-inner">
-                    <div class="card-front"><span id="front-text" class="text-4xl"></span></div>
-                    <div class="card-back"><span id="back-text" class="text-2xl"></span></div>
-                </div>
-            </div>
-            <div class="flex justify-between items-center w-full mt-24">
-                <button onclick="prevCard()" class="nav-btn">‹</button>
-                <div class="text-center"><span id="card-progress" class="text-xs font-bold text-slate-300"></span><br><span id="lesson-name" class="font-bold text-slate-400"></span></div>
-                <button onclick="nextCard()" class="nav-btn">›</button>
-            </div>
-        </div>
-
-        <div id="quiz-screen" class="screen">
-            <div class="w-full flex justify-between my-4 items-center">
-                <button onclick="showScreen('flashcard-screen')" class="text-slate-400 font-bold">← Thoát</button>
-                <span id="quiz-progress" class="font-bold text-slate-400"></span>
-                <span class="text-indigo-600 font-bold">Điểm: <span id="score">0</span></span>
-            </div>
-            <div class="w-full bg-white p-10 rounded-[45px] text-center mb-8 min-h-[160px] flex items-center justify-center shadow-sm">
-                <span id="quiz-q" class="font-black text-slate-700 text-3xl text-center"></span>
-            </div>
-            <div id="quiz-options" class="w-full flex flex-col gap-3"></div>
-        </div>
+        <div id="book-list" class="book-grid"></div>
     </div>
 
-    <script>
-        // Sử dụng ID Sheet từ link bạn gửi
-        const SHEET_ID = '1LXVDElHMCKBoqwa0fj9E9iui_rllXSOaUPjbz4dSXPo';
-        const SHEET_NAME = 'Từ Mới Tiếng Nhật Giao Tiếp';
+    <div id="screen-range">
+        <button onclick="document.getElementById('screen-range').style.display='none'" style="background:none; border:none; font-size:18px; color:var(--gray); text-align:left; margin-bottom:20px;">← Back</button>
+        <div class="range-box">
+            <h3 id="range-title" style="margin-bottom:10px;">Select Range</h3>
+            <div class="slider-wrap">
+                <p>Từ bài: <span id="val-from" class="range-val">1</span></p>
+                <input type="range" id="slide-from" min="1" max="1" value="1" oninput="updateRangeLabel()">
+            </div>
+            <div class="slider-wrap">
+                <p>Đến bài: <span id="val-to" class="range-val">1</span></p>
+                <input type="range" id="slide-to" min="1" max="1" value="1" oninput="updateRangeLabel()">
+            </div>
+            <p id="total-words-hint" style="color:var(--gray); font-size:14px; margin-bottom:20px;"></p>
+            <button class="start-btn" onclick="confirmRange()">Start Learning</button>
+        </div>
+    </div>
+    
+    <div id="screen-study" style="display:none; height:100%; flex-direction:column;">
+        <div class="header">
+            <div class="top-row">
+                <button onclick="location.reload()" style="background:none; border:none; font-size:24px; color:var(--gray)">✕</button>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button id="btn-review-toggle" onclick="toggleReviewMode()" style="background:none; border:none; font-size:20px; color:var(--gray)">🔄</button>
+                    <b id="progress" style="color:var(--gray); font-size: 14px;">0/0</b>
+                </div>
+                <div style="width:24px"></div>
+            </div>
+            <div class="pg-bar-wrap"><div id="pg-bar-fill"></div></div>
+            <div class="tab-menu">
+                <div id="t-card" class="tab-link active" onclick="setMode('card')">Học thẻ</div>
+                <div id="t-quiz" class="tab-link" onclick="setMode('quiz')">Trắc nghiệm</div>
+                <div id="t-input" class="tab-link" onclick="setMode('input')">Luyện viết</div>
+            </div>
+            <div class="controls">
+                <button id="m-all" class="m-btn active" onclick="viewMode('all')">全</button>
+                <button id="m-hi" class="m-btn" onclick="viewMode('hi')">ひ</button>
+                <button id="m-vn" class="m-btn" onclick="viewMode('vn')">VN</button>
+                <button id="m-hiv" class="m-btn" onclick="viewMode('hiv')">ひ/V</button>
+                <button class="ctrl-btn" onclick="shuffleData()">🔀</button>
+                <button class="ctrl-btn" onclick="say()">🔊</button>
+            </div>
+        </div>
 
-        let allWords = [], currentVocab = [], curIdx = 0, score = 0;
+        <div class="main-content">
+            <div class="flip-container">
+                <div id="flipper" class="flipper" onclick="flip()">
+                    <div class="box-wrapper box-front">
+                        <div id="main-txt-container"><span id="main-txt"></span></div>
+                        <div id="sub-txt"></div>
+                    </div>
+                    <div class="box-wrapper box-back">
+                        <div id="main-txt-container-back"><span id="main-txt-back"></span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="area-actions" class="review-actions">
+                <div class="action-btn btn-no" onclick="markReview(true)">✘</div>
+                <div class="action-btn btn-ok" onclick="markReview(false)">✔</div>
+            </div>
 
-        async function initApp() {
-            // Thay vì fetch CSV trực tiếp, dùng visualization API để tránh lỗi CORS cục bộ
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-            try {
-                const res = await fetch(url);
-                const text = await res.text();
-                const json = JSON.parse(text.substr(47).slice(0, -2));
-                allWords = json.table.rows.map(r => ({
-                    h: r.c[0]?.v || "", // Từ mới
-                    n: r.c[1]?.v || "", // Nghĩa
-                    b: r.c[2]?.v || "Khác", // Cấp
-                    l: parseInt(r.c[3]?.v) || 1 // Bài
-                })).filter(w => w.h && w.n);
-                renderLibrary();
-            } catch (e) {
-                alert("Lỗi tải dữ liệu. Hãy tải file này lên Netlify hoặc GitHub Pages!");
+            <div id="area-quiz" style="display:none; width:100%; padding-bottom:10px;"><div id="quiz-options"></div></div>
+
+            <div id="input-quiz-wrap">
+                <input type="text" 
+                       id="user-input" 
+                       placeholder="Nhập hiragana..." 
+                       autocomplete="off" 
+                       autocorrect="off" 
+                       autocapitalize="off" 
+                       spellcheck="false">
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button class="nav-btn" onclick="go(-1)">‹</button>
+            <span id="tag-lv" style="color:var(--gray); font-weight:bold; font-size:13px;"></span>
+            <button class="nav-btn" onclick="go(1)">›</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbww4a3Yu9xht0nBQHiTYHR9CApNstB9NQ-2840R6J9nB3tBi7Oh4xsG48a4UqQF2i6A_A/exec";
+    let db = [], filtered = [], allOfBook = [], reviewList = [], cur = 0, appMode = 'card', displayMode = 'all', isFlipped = false, isReviewMode = false;
+
+    const inputField = document.getElementById('user-input');
+    
+    function clearInputCompletely() {
+        inputField.value = "";
+        inputField.blur(); 
+        setTimeout(() => {
+            inputField.value = ""; 
+            inputField.focus();
+        }, 10);
+    }
+
+    inputField.addEventListener('input', (e) => {
+        const correct = filtered[cur][3];
+        const val = inputField.value.trim();
+        if (val === correct) {
+            inputField.style.borderColor = 'var(--success)';
+            if(isReviewMode) markReview(false, false); 
+            setTimeout(() => {
+                if (cur < filtered.length - 1) { cur++; clearInputCompletely(); update(); }
+                else { alert("Hoàn thành!"); location.reload(); }
+            }, 200);
+        } else if (val.length >= correct.length && val !== correct) {
+            inputField.style.borderColor = 'var(--red)';
+            markReview(true, false); 
+        }
+    });
+
+    function adjustFullWidth() {
+        const elFront = document.getElementById('main-txt');
+        const elBack = document.getElementById('main-txt-back');
+        const container = document.getElementById('main-txt-container');
+        const maxWidth = container.offsetWidth;
+
+        [elFront, elBack].forEach(el => {
+            if(!el) return;
+            let fontSize = 20; 
+            el.style.fontSize = fontSize + 'px';
+            while (el.offsetWidth < maxWidth - 20 && fontSize < 130) { fontSize += 2; el.style.fontSize = fontSize + 'px'; }
+            while (el.offsetWidth > maxWidth - 10 && fontSize > 20) { fontSize -= 1; el.style.fontSize = fontSize + 'px'; }
+        });
+    }
+
+    async function load() {
+        try {
+            const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+            const data = await res.json();
+            db = data.slice(1).filter(r => r[0] && r[0].trim() !== "");
+            reviewList = JSON.parse(localStorage.getItem('review_data') || "[]");
+            renderBooks();
+            updateReviewButton();
+        } catch(e) { document.getElementById('book-list').innerText = "Lỗi kết nối."; }
+    }
+
+    function renderBooks() {
+        const lvs = [...new Set(db.map(r => r[0]))];
+        document.getElementById('book-list').innerHTML = lvs.map((l, i) => {
+            const count = db.filter(r => r[0] === l).length;
+            const colorIdx = i % 4;
+            return `
+                <div class="book-card color-${colorIdx}" onclick="openRangePicker('${l}')">
+                    <div class="book-tag tag-${colorIdx}">${count} Words</div>
+                    <div class="book-title">${l}</div>
+                    <div class="book-footer">
+                        <div class="book-icon">📖</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function updateReviewButton() {
+        const btn = document.getElementById('btn-master-review');
+        const badge = document.getElementById('review-count-badge');
+        if (reviewList.length > 0) {
+            btn.style.display = 'flex';
+            badge.innerText = reviewList.length;
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    function startMasterReview() {
+        filtered = db.filter(r => reviewList.includes(r[2]));
+        if (filtered.length === 0) return;
+        isReviewMode = true;
+        document.getElementById('screen-books').style.display = 'none';
+        document.getElementById('screen-study').style.display = 'flex';
+        document.getElementById('tag-lv').innerText = "🚨 Ôn tập tổng hợp";
+        document.getElementById('btn-review-toggle').style.color = 'var(--red)';
+        cur = 0; update();
+    }
+
+    function openRangePicker(bookName) {
+        allOfBook = db.filter(r => r[0] === bookName);
+        const lessons = [...new Set(allOfBook.map(r => r[1]))].map(Number).sort((a,b)=>a-b);
+        const minL = Math.min(...lessons), maxL = Math.max(...lessons);
+        document.getElementById('range-title').innerText = bookName;
+        const sFrom = document.getElementById('slide-from'), sTo = document.getElementById('slide-to');
+        sFrom.min = sTo.min = minL; sFrom.max = sTo.max = maxL;
+        sFrom.value = minL; sTo.value = maxL;
+        updateRangeLabel();
+        document.getElementById('screen-range').style.display = 'flex';
+        document.getElementById('tag-lv').innerText = bookName;
+    }
+
+    function updateRangeLabel() {
+        const f = document.getElementById('slide-from').value;
+        const t = document.getElementById('slide-to').value;
+        document.getElementById('val-from').innerText = f;
+        document.getElementById('val-to').innerText = t;
+        const count = allOfBook.filter(r => Number(r[1]) >= f && Number(r[1]) <= t).length;
+        document.getElementById('total-words-hint').innerText = `Tổng cộng: ${count} từ vựng`;
+    }
+
+    function confirmRange() {
+        const f = Number(document.getElementById('slide-from').value);
+        const t = Number(document.getElementById('slide-to').value);
+        filtered = allOfBook.filter(r => Number(r[1]) >= f && Number(r[1]) <= t);
+        isReviewMode = false;
+        document.getElementById('screen-range').style.display = 'none';
+        document.getElementById('screen-books').style.display = 'none';
+        document.getElementById('screen-study').style.display = 'flex';
+        cur = 0; update();
+    }
+
+    function shuffleData() { filtered.sort(() => Math.random() - 0.5); cur = 0; update(); }
+
+    function update() {
+        if(!filtered[cur]) return;
+        const item = filtered[cur];
+        document.getElementById('progress').innerText = `${cur + 1} / ${filtered.length}`;
+        document.getElementById('pg-bar-fill').style.width = ((cur + 1) / filtered.length * 100) + '%';
+        
+        // Reset lật
+        isFlipped = false;
+        document.getElementById('flipper').classList.remove('flipped');
+        
+        const mainTxt = document.getElementById('main-txt');
+        const mainTxtBack = document.getElementById('main-txt-back');
+        const subTxt = document.getElementById('sub-txt');
+
+        if (displayMode === 'all') { mainTxt.innerText = item[2]; subTxt.innerText = item[3]; mainTxtBack.innerText = item[4]; }
+        else if (displayMode === 'hi') { mainTxt.innerText = item[2]; subTxt.innerText = ""; mainTxtBack.innerText = item[3]; }
+        else if (displayMode === 'vn') { mainTxt.innerText = item[2]; subTxt.innerText = ""; mainTxtBack.innerText = item[4]; }
+        else if (displayMode === 'hiv') { mainTxt.innerText = item[3]; subTxt.innerText = ""; mainTxtBack.innerText = item[4]; }
+        
+        adjustFullWidth();
+        if(appMode === 'quiz') renderQuiz();
+        if(appMode === 'input') {
+            inputField.value = "";
+            inputField.style.borderColor = "#e2e8f0";
+            setTimeout(() => inputField.focus(), 50);
+        }
+    }
+
+    function flip() {
+        if(appMode !== 'card') return;
+        isFlipped = !isFlipped;
+        const flipper = document.getElementById('flipper');
+        if(isFlipped) {
+            flipper.classList.add('flipped');
+        } else {
+            flipper.classList.remove('flipped');
+        }
+    }
+
+    function renderQuiz() {
+        const item = filtered[cur];
+        let correct = (displayMode === 'hi' ? item[3] : item[4]);
+        let others = db.filter(r => (displayMode === 'hi' ? r[3] : r[4]) !== correct).map(r => (displayMode === 'hi' ? r[3] : r[4]));
+        let options = [correct, ...others.sort(() => 0.5 - Math.random()).slice(0, 3)].sort(() => 0.5 - Math.random());
+        document.getElementById('quiz-options').innerHTML = options.map(opt => `<button class="opt-btn" onclick="checkQuiz(this, '${opt}', '${correct}')">${opt}</button>`).join('');
+    }
+
+    function checkQuiz(btn, sel, cor) {
+        if(sel === cor) {
+            btn.style.background = 'var(--success)'; btn.style.color = '#fff';
+            if(isReviewMode) markReview(false, false); 
+            setTimeout(() => { if(cur < filtered.length - 1) { cur++; update(); } }, 500);
+        } else { 
+            btn.style.background = 'var(--red)'; btn.style.color = '#fff'; 
+            markReview(true, false); 
+        }
+    }
+
+    function markReview(needsReview, moveNext = true) {
+        if(!filtered[cur]) return;
+        const word = filtered[cur][2];
+        if(needsReview) {
+            if(!reviewList.includes(word)) reviewList.push(word);
+        } else {
+            reviewList = reviewList.filter(w => w !== word);
+        }
+        localStorage.setItem('review_data', JSON.stringify(reviewList));
+        updateReviewButton();
+
+        if(moveNext) {
+            if(cur < filtered.length - 1) { cur++; update(); } 
+            else { 
+                alert(isReviewMode ? "Đã duyệt hết từ sai!" : "Xong bài học!"); 
+                location.reload();
             }
         }
+    }
 
-        function renderLibrary() {
-            const levels = [...new Set(allWords.map(w => w.b))];
-            const colors = ['bg-[#f0fff4]', 'bg-[#fff5f7]', 'bg-[#fffaf0]'];
-            document.getElementById('book-list-container').innerHTML = levels.map((lvl, i) => `
-                <div onclick="selectLevel('${lvl}')" class="book-card ${colors[i % 3]} border-transparent">
-                    <span class="word-count shadow-sm">${allWords.filter(w => w.b === lvl).length} Từ</span>
-                    <h2 class="text-slate-800 text-xl font-black">${lvl}</h2>
-                </div>`).join('');
+    function setMode(m) {
+        appMode = m;
+        document.getElementById('t-card').className = 'tab-link ' + (m === 'card' ? 'active' : '');
+        document.getElementById('t-quiz').className = 'tab-link ' + (m === 'quiz' ? 'active' : '');
+        document.getElementById('t-input').className = 'tab-link ' + (m === 'input' ? 'active' : '');
+        
+        document.getElementById('area-actions').style.display = (m === 'card') ? 'flex' : 'none';
+        document.getElementById('area-quiz').style.display = (m === 'quiz') ? 'block' : 'none';
+        document.getElementById('input-quiz-wrap').style.display = (m === 'input') ? 'block' : 'none';
+        update();
+    }
+
+    function viewMode(v) {
+        displayMode = v;
+        ['all','hi','vn','hiv'].forEach(m => {
+            const el = document.getElementById('m-'+m);
+            if(el) el.className = 'm-btn ' + (v === m ? 'active' : '');
+        });
+        update();
+    }
+
+    function toggleReviewMode() {
+        isReviewMode = !isReviewMode;
+        document.getElementById('btn-review-toggle').style.color = isReviewMode ? 'var(--red)' : 'var(--gray)';
+        if(isReviewMode) {
+            filtered = db.filter(r => reviewList.includes(r[2]));
+            if(filtered.length === 0) { alert("Không có từ nào cần ôn tập!"); isReviewMode = false; return; }
+        } else {
+            filtered = allOfBook;
         }
+        cur = 0; update();
+    }
 
-        function selectLevel(lvl) {
-            document.getElementById('setup-title').innerText = lvl;
-            const words = allWords.filter(w => w.b === lvl);
-            const lessons = words.map(w => w.l);
-            const minL = Math.min(...lessons), maxL = Math.max(...lessons);
-            const r1 = document.getElementById('range1'), r2 = document.getElementById('range2');
-            r1.min = r2.min = minL; r1.max = r2.max = maxL; r1.value = minL; r2.value = maxL;
-            v1.innerText = minL; v2.innerText = maxL;
-            showScreen('setup-screen');
-        }
-
-        function startStudy() {
-            const lvl = document.getElementById('setup-title').innerText;
-            const f = parseInt(v1.innerText), t = parseInt(v2.innerText);
-            currentVocab = allWords.filter(w => w.b === lvl && w.l >= f && w.l <= t);
-            curIdx = 0; updateCard(); showScreen('flashcard-screen');
-        }
-
-        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        function updateCard() {
-            const item = currentVocab[curIdx];
-            document.getElementById('front-text').innerText = item.h;
-            document.getElementById('back-text').innerText = item.n;
-            document.getElementById('lesson-name').innerText = "Bài " + item.l;
-            document.getElementById('card-progress').innerText = `${curIdx + 1} / ${currentVocab.length}`;
-            document.getElementById('card-inner').parentElement.classList.remove('flipped');
-        }
-        function nextCard() { if (curIdx < currentVocab.length - 1) { curIdx++; updateCard(); } }
-        function prevCard() { if (curIdx > 0) { curIdx--; updateCard(); } }
-        function shuffleData() { currentVocab.sort(() => Math.random() - 0.5); curIdx = 0; updateCard(); }
-
-        function initQuiz() { 
-            currentVocab.sort(() => Math.random() - 0.5); 
-            curIdx = 0; score = 0; document.getElementById('score').innerText = '0';
-            renderQuiz(); showScreen('quiz-screen'); 
-        }
-
-        function renderQuiz() {
-            const item = currentVocab[curIdx];
-            document.getElementById('quiz-q').innerText = item.h;
-            document.getElementById('quiz-progress').innerText = `${curIdx + 1} / ${currentVocab.length}`;
-            let opts = [item.n];
-            while(opts.length < 4) {
-                let r = allWords[Math.floor(Math.random() * allWords.length)].n;
-                if(!opts.includes(r)) opts.push(r);
-            }
-            opts.sort(() => Math.random() - 0.5);
-            document.getElementById('quiz-options').innerHTML = opts.map(o => `<button class="quiz-option" onclick="checkQuiz('${o}', '${item.n}')">${o}</button>`).join('');
-        }
-
-        function checkQuiz(s, c) {
-            if(s === c) { score++; document.getElementById('score').innerText = score; }
-            if(curIdx < currentVocab.length - 1) { curIdx++; renderQuiz(); } 
-            else { alert("Xong! Điểm: " + score); showScreen('library-screen'); }
-        }
-
-        initApp();
-    </script>
+    function go(d) { cur = (cur + d + filtered.length) % filtered.length; update(); }
+    function say() { const m = new SpeechSynthesisUtterance(filtered[cur][2]); m.lang = 'ja-JP'; window.speechSynthesis.speak(m); }
+    load();
+</script>
 </body>
 </html>
